@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="ISO-8859-1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Personal Website</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        nav {
+            background: #333;
+            padding: 10px;
+        }
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin: 0 15px;
+            font-size: 18px;
+        }
+        section {
+            display: none;
+            padding: 20px;
+            background: white;
+            margin: 20px auto;
+            width: 50%;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        input, button {
+            margin: 10px;
+            padding: 10px;
+            width: 80%;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            background: #28a745;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #218838;
+        }
+        .error {
+            color: red;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="#" onclick="showPage('home')">Home</a> | 
+        <a href="#" onclick="showPage('projects')">Projects</a> | 
+        <a href="#" onclick="showPage('register')">Register</a> | 
+        <a href="#" onclick="showPage('login')">Login</a> | 
+        <a href="#" onclick="logout()">Logout</a>
+    </nav>
+
+    <section id="home">
+        <h1>Welcome to My Personal Website</h1>
+        <h2>About Me</h2>
+        <p>This is my personal website where I showcase my work and experiences.</p>
+        <h3>My Resume</h3>
+        <a href="resume.pdf" target="_blank">Download Resume (PDF)</a>
+        
+        <h2>User Details:</h2>
+        <p><strong>Name:</strong> <span id="profileName"></span></p>
+        <p><strong>Department:</strong> <span id="profileDepartment"></span></p>
+        <p><strong>Year:</strong> <span id="profileYear"></span></p>
+        <p><strong>Section:</strong> <span id="profileSection"></span></p>
+    </section>
+
+    <section id="projects">
+        <h1>My Projects</h1>
+        <h2>Project 1</h2>
+        <p>Details about Project 1.</p>
+        <h2>Project 2</h2>
+        <p>Details about Project 2.</p>
+    </section>
+
+    <section id="register">
+        <h1>Register</h1>
+        <form id="registerForm">
+            <input type="text" id="name" placeholder="Name" required><br>
+            <input type="text" id="department" placeholder="Department" required><br>
+            <input type="text" id="year" placeholder="Year" required><br>
+            <input type="text" id="section" placeholder="Section" required><br>
+            <input type="text" id="username" placeholder="Username" required><br>
+            <input type="password" id="password" placeholder="Password" required><br>
+            <input type="password" id="confirmPassword" placeholder="Confirm Password" required><br>
+            <button type="button" onclick="registerUser()">Register</button>
+            <p class="error" id="registerError"></p>
+        </form>
+        <p>Already registered? <a href="#" onclick="showPage('login')">Login here</a></p>
+    </section>
+
+    <section id="login">
+        <h1>Login</h1>
+        <form id="loginForm">
+            <input type="text" id="loginUsername" placeholder="Username" required><br>
+            <input type="password" id="loginPassword" placeholder="Password" required><br>
+            <button type="button" onclick="loginUser()">Login</button>
+            <p class="error" id="loginError"></p>
+        </form>
+        <p>New User? <a href="#" onclick="showPage('register')">Register here</a></p>
+    </section>
+
+    <section id="exit">
+        <h1>Thanks for visiting my website!</h1>
+    </section>
+
+    <script>
+        function showPage(pageId) {
+            document.querySelectorAll("section").forEach(section => section.style.display = "none");
+            document.getElementById(pageId).style.display = "block";
+
+            if (pageId === "home") displayProfileDetails();
+            if (pageId === "register") clearRegisterFields();
+            if (pageId === "login") clearLoginFields();
+        }
+
+        function registerUser() {
+            let name = document.getElementById("name").value;
+            let department = document.getElementById("department").value;
+            let year = document.getElementById("year").value;
+            let section = document.getElementById("section").value;
+            let username = document.getElementById("username").value;
+            let password = document.getElementById("password").value;
+            let confirmPassword = document.getElementById("confirmPassword").value;
+            let errorBox = document.getElementById("registerError");
+
+            if (password !== confirmPassword) {
+                errorBox.textContent = "Passwords do not match!";
+                return;
+            }
+
+            let users = JSON.parse(localStorage.getItem("users")) || {};
+            users[username] = { name, department, year, section, password };
+            localStorage.setItem("users", JSON.stringify(users));
+
+            alert("Registration successful! Redirecting to Login Page.");
+            clearRegisterFields();
+            showPage('login');
+        }
+
+        function loginUser() {
+            let loginUsername = document.getElementById("loginUsername").value;
+            let loginPassword = document.getElementById("loginPassword").value;
+            let errorBox = document.getElementById("loginError");
+
+            let users = JSON.parse(localStorage.getItem("users")) || {};
+
+            if (users[loginUsername] && users[loginUsername].password === loginPassword) {
+                localStorage.setItem("loggedInUser", loginUsername);
+                alert("Login successful! Redirecting to Home Page.");
+                clearLoginFields();
+                showPage('home');
+            } else {
+                errorBox.textContent = "Invalid username or password!";
+            }
+        }
+
+        function displayProfileDetails() {
+            let loggedInUser = localStorage.getItem("loggedInUser");
+            let users = JSON.parse(localStorage.getItem("users")) || {};
+            let user = users[loggedInUser] || {};
+
+            document.getElementById("profileName").textContent = user.name || "";
+            document.getElementById("profileDepartment").textContent = user.department || "";
+            document.getElementById("profileYear").textContent = user.year || "";
+            document.getElementById("profileSection").textContent = user.section || "";
+        }
+
+        function logout() {
+            localStorage.removeItem("loggedInUser");
+            document.querySelectorAll("#profileName, #profileDepartment, #profileYear, #profileSection").forEach(el => el.textContent = "");
+            alert("You have been logged out.");
+            showPage('exit');
+        }
+
+        function clearRegisterFields() {
+            document.querySelectorAll("#registerForm input").forEach(input => input.value = "");
+        }
+
+        function clearLoginFields() {
+            document.querySelectorAll("#loginForm input").forEach(input => input.value = "");
+        }
+
+        showPage('home');
+    </script>
+
+</body>
+</html>
